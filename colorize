@@ -1,0 +1,7 @@
+#!/bin/sh
+
+DIR=$(mktemp -d color.XX)
+trap "rm -rf $DIR" 0 2 15
+
+PAGE=$DIR/page.html
+sha256 -q $* | xargs ./mdcolor | ./pagefmt > $PAGE && surf $PAGE
