@@ -7,7 +7,7 @@
 
 #define COLOR_BLOCKS 16
 #define BLOCKS_PER_ROW 4
-#define DIM_STR "7px"
+#define DIM_STR "2px"
 
 typedef struct {
   unsigned char r;
@@ -17,11 +17,14 @@ typedef struct {
 
 static const char *header =
   "<!doctype html>\n"
-  "<style>div{display:inline-block;width:" DIM_STR ";height:" DIM_STR "}\n";
+  "<style>\n"
+  "table{border-collapse:collapse}\n"
+  "td{width:" DIM_STR ";height:" DIM_STR "}\n";
 static const char *stylefmt = "#%c{background-color:%s}\n";
-static const char *endheader = "</style>\n<body>";
-static const char *divfmt = "<div id=%c></div>";
-static const char *spacer = "<br>";
+static const char *endheader = "</style>\n<table><tr>";
+static const char *divfmt = "<td id=%c></td>";
+static const char *spacer = "</tr><tr>";
+static const char *end = "</tr></table>\n";
 
 void
 u16torgb(u_int16_t in, rgb_t *out)
@@ -68,7 +71,7 @@ print_page(rgb_t *cs)
       printf(spacer);
     free(ss[i]);
   }
-  printf("\n");
+  printf(end);
 }
 
 int
