@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define COLOR_BLOCKS 5
+#define COLOR_BLOCKS 16
+#define BLOCKS_PER_ROW 4
 #define DIM_STR "7px"
 
 typedef struct {
@@ -20,6 +21,7 @@ static const char *header =
 static const char *stylefmt = "#%c{background-color:%s}\n";
 static const char *endheader = "</style>\n<body>";
 static const char *divfmt = "<div id=%c></div>";
+static const char *spacer = "<br>";
 
 void
 u16torgb(u_int16_t in, rgb_t *out)
@@ -40,7 +42,7 @@ mdcolor(void *md, size_t mdlen, rgb_t *out)
 }
 
 char *
-get_color(rgb_t c)
+rgbtohex(rgb_t c)
 {
   size_t len = strlen("#000000");
   char *ret = malloc(len + 1);
@@ -56,12 +58,14 @@ print_page(rgb_t *cs)
   int i;
   printf(header);
   for (i = 0; i < COLOR_BLOCKS; i++) {
-    ss[i] = get_color(cs[i]);
+    ss[i] = rgbtohex(cs[i]);
     printf(stylefmt, 'a'+i, ss[i]);
   }
   printf(endheader);
   for (i = 0; i < COLOR_BLOCKS; i++) {
     printf(divfmt, 'a' + i);
+    if (i % BLOCKS_PER_ROW == BLOCKS_PER_ROW - 1)
+      printf(spacer);
     free(ss[i]);
   }
   printf("\n");
