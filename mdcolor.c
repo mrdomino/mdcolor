@@ -5,7 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define COLOR_BLOCKS 16
+
+#define DIGEST_LENGTH 256
+
+#define COLOR_BLOCKS (DIGEST_LENGTH / 16)
 #define BLOCKS_PER_ROW 4
 #define DIM_STR "2px"
 
@@ -25,6 +28,13 @@ static const char *endheader = "</style>\n<table><tr>";
 static const char *divfmt = "<td id=%c></td>";
 static const char *spacer = "</tr><tr>";
 static const char *end = "</tr></table>\n";
+
+static void
+usage(char *progname)
+{
+  fprintf(stderr, "usage: %s <sha256>\n", progname);
+  exit(1);
+}
 
 void
 u16torgb(u_int16_t in, rgb_t *out)
@@ -54,6 +64,23 @@ rgbtohex(rgb_t c)
   return ret;
 }
 
+int
+read_digest(const char *str, u_int16_t *out)
+{
+  int i;
+
+  if (strlen(str) != DIGEST_LENGTH / 4) {
+    return -1;
+  }
+  for (i = 0; i < DIGEST_LENGTH / 16; i++) {
+    if (sscanf(str, "%04hx", &out[i]) != 1) {
+      return -1;
+    }
+    str += 4;
+  }
+  return 0;
+}
+
 void
 print_page(rgb_t *cs)
 {
@@ -78,12 +105,10 @@ int
 main(int argc, char **argv)
 {
   rgb_t c[COLOR_BLOCKS];
-  int i;
-  ssize_t r;
-  char buf[sizeof(u_int16_t)*COLOR_BLOCKS];
+  u_int16_t buf[COLOR_BLOCKS];
 
-  if (read(0, buf, sizeof buf) < sizeof buf) {
-    return 1;
+  if (argc != 2 || read_digest(argv[1], buf) < 0) {
+    usage(argv[0]);
   }
   mdcolor(buf, sizeof buf, c);
   print_page(c);
