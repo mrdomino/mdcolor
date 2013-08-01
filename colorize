@@ -3,5 +3,10 @@
 DIR=$(mktemp -d color.XX)
 trap "rm -rf $DIR" 0 2 15
 
+if [ ! -f ./mdcolor ]
+then
+	make mdcolor
+fi
+
 PAGE=$DIR/page.html
 sha256 -q $* | xargs ./mdcolor | ./pagefmt > $PAGE && surf $PAGE
