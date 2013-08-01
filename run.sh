@@ -1,4 +1,4 @@
 #!/bin/sh
-make mdcolor &&
-  ./mdcolor $(head -c8 /dev/urandom | sha256sum | cut -d' ' -f1) > color.html &&
-  xdg-open color.html
+BROWSER=surf
+make mdcolor && ./mdcolor $(sha256 < $1) | ./pagefmt > page.html &&
+	${BROWSER} page.html

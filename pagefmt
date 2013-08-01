@@ -1,0 +1,34 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+my $DIM = "2px";
+
+my @colors = <STDIN>;
+chomp @colors;
+
+print <<EOF;
+<!doctype html>
+<style>
+table{border-collapse:collapse}
+td{width:$DIM;height:$DIM}
+EOF
+
+my $id = 'a';
+foreach my $color ( @colors ) {
+	print "#${id}{background-color:#$color}\n";
+	$id++;
+}
+
+print "</style><table><tr>";
+
+$id = 'a';
+foreach my $i (0 .. $#colors ) {
+	print "<td id=$id></td>";
+	$id++;
+	if ($i % 4 == 3) {
+		print "</tr><tr>";
+	}
+}
+print "</tr></table>\n"

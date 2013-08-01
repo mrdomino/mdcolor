@@ -2,15 +2,11 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 
 #define DIGEST_LENGTH 256
-
 #define COLOR_BLOCKS (DIGEST_LENGTH / 16)
-#define BLOCKS_PER_ROW 4
-#define DIM_STR "2px"
 
 typedef struct {
   unsigned char r;
@@ -18,22 +14,11 @@ typedef struct {
   unsigned char b;
 } rgb_t;
 
-static const char *header =
-  "<!doctype html>\n"
-  "<style>\n"
-  "table{border-collapse:collapse}\n"
-  "td{width:" DIM_STR ";height:" DIM_STR "}\n";
-static const char *stylefmt = "#%c{background-color:%s}\n";
-static const char *endheader = "</style>\n<table><tr>";
-static const char *divfmt = "<td id=%c></td>";
-static const char *spacer = "</tr><tr>";
-static const char *end = "</tr></table>\n";
 
 static void
 usage(char *progname)
 {
   fprintf(stderr, "usage: %s <sha256>\n", progname);
-  exit(1);
 }
 
 void
@@ -45,7 +30,13 @@ u16torgb(u_int16_t in, rgb_t *out)
 }
 
 void
-mdcolor(void *md, size_t mdlen, rgb_t *out)
+printrgbhex(rgb_t c)
+{
+  printf("%02hhx%02hhx%02hhx\n", c.r, c.g, c.b);
+}
+
+void
+mdcolor(const void *md, size_t mdlen, rgb_t *out)
 {
   int i;
   assert(mdlen >= sizeof(u_int16_t) * COLOR_BLOCKS);
@@ -54,25 +45,15 @@ mdcolor(void *md, size_t mdlen, rgb_t *out)
   }
 }
 
-char *
-rgbtohex(rgb_t c)
-{
-  size_t len = strlen("#000000");
-  char *ret = malloc(len + 1);
-  snprintf(ret, len + 1, "#%02hhx%02hhx%02hhx", c.r, c.g, c.b);
-  ret[len] = '\0';
-  return ret;
-}
-
 int
 read_digest(const char *str, u_int16_t *out)
 {
   int i;
 
-  if (strlen(str) != DIGEST_LENGTH / 4) {
+  if (strlen(str) != COLOR_BLOCKS * 4) {
     return -1;
   }
-  for (i = 0; i < DIGEST_LENGTH / 16; i++) {
+  for (i = 0; i < COLOR_BLOCKS; i++) {
     if (sscanf(str, "%04hx", &out[i]) != 1) {
       return -1;
     }
@@ -81,36 +62,20 @@ read_digest(const char *str, u_int16_t *out)
   return 0;
 }
 
-void
-print_page(rgb_t *cs)
-{
-  char *ss[COLOR_BLOCKS];
-  int i;
-  printf(header);
-  for (i = 0; i < COLOR_BLOCKS; i++) {
-    ss[i] = rgbtohex(cs[i]);
-    printf(stylefmt, 'a'+i, ss[i]);
-  }
-  printf(endheader);
-  for (i = 0; i < COLOR_BLOCKS; i++) {
-    printf(divfmt, 'a' + i);
-    if (i % BLOCKS_PER_ROW == BLOCKS_PER_ROW - 1)
-      printf(spacer);
-    free(ss[i]);
-  }
-  printf(end);
-}
-
 int
 main(int argc, char **argv)
 {
+  int i;
   rgb_t c[COLOR_BLOCKS];
   u_int16_t buf[COLOR_BLOCKS];
 
   if (argc != 2 || read_digest(argv[1], buf) < 0) {
     usage(argv[0]);
+    return 1;
   }
   mdcolor(buf, sizeof buf, c);
-  print_page(c);
+  for (i = 0; i < COLOR_BLOCKS; ++i) {
+    printrgbhex(c[i]);
+  }
   return 0;
 }
