@@ -1,7 +1,9 @@
 #!/bin/sh
 
+BROWSE=surf
+
 WD=$(dirname $0)
-TD=$(mktemp -td color.XX)
+TD=$(mktemp -td color.XXX)
 trap "rm -rf $TD" 0 2 15
 
 if [ ! -f $WD/mdcolor ]
@@ -9,5 +11,17 @@ then
 	( cd $WD && make mdcolor )
 fi
 
+sha2() {
+	if [ -x $(which sha256sum) ]
+	then
+		sha256sum $* | cut -d' ' -f1
+	elif [ -x $(which sha256) ]
+	then
+		sha256 -q $*
+	else
+		echo "No sha256 found." 1>&2
+	fi
+}
+
 PAGE=$TD/page.html
-sha256 -q $* | xargs $WD/mdcolor | $WD/pagefmt > $PAGE && surf $PAGE
+sha2 $* | xargs $WD/mdcolor | $WD/pagefmt > $PAGE && $BROWSE file://$PAGE
