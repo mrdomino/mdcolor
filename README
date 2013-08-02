@@ -1,0 +1,5 @@
+This is a visual representation for 256-bit numbers (specifically, SHA-256
+hashes). The intent is to make it easy to compare two hashes for equality, and
+hard to construct two hashes that look similar. This is accomplished by
+interpreting the hash as a 4x4 grid of 16-bit colors (5 bits red, 5 bits blue,
+6 bits green).
