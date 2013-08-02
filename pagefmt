@@ -13,20 +13,13 @@ print <<EOF;
 <style>
 table{border-collapse:collapse}
 td{width:$DIM;height:$DIM}
+</style><table><tr>
 EOF
-
-my $id = 'a';
-foreach my $color ( @colors ) {
-	print "#${id}{background-color:#$color}\n";
-	$id++;
-}
 
 print "</style><table><tr>";
 
-$id = 'a';
 foreach my $i (0 .. $#colors ) {
-	print "<td id=$id></td>";
-	$id++;
+	print "<td style='background-color:#${colors[$i]}'></td>";
 	if ($i % 4 == 3) {
 		print "</tr><tr>";
 	}
