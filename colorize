@@ -1,12 +1,13 @@
 #!/bin/sh
 
-DIR=$(mktemp -d color.XX)
-trap "rm -rf $DIR" 0 2 15
+WD=$(dirname $0)
+TD=$(mktemp -td color.XX)
+trap "rm -rf $TD" 0 2 15
 
-if [ ! -f ./mdcolor ]
+if [ ! -f $WD/mdcolor ]
 then
-	make mdcolor
+	( cd $WD && make mdcolor )
 fi
 
-PAGE=$DIR/page.html
-sha256 -q $* | xargs ./mdcolor | ./pagefmt > $PAGE && surf $PAGE
+PAGE=$TD/page.html
+sha256 -q $* | xargs $WD/mdcolor | $WD/pagefmt > $PAGE && surf $PAGE
