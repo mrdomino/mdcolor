@@ -14,9 +14,13 @@ typedef struct {
 	unsigned char b;
 } rgb_t;
 
+typedef struct {
+	rgb_t c[COLOR_BLOCKS];
+} mdcolor_t;
+
 
 static void
-usage(char *progname)
+usage(const char *progname)
 {
 	fprintf(stderr, "usage: %s <sha256>\n", progname);
 }
@@ -36,29 +40,28 @@ printrgbhex(rgb_t c)
 }
 
 void
-mdcolor(const void *md, size_t mdlen, rgb_t *out)
+mdcolor(const u_int16_t *md, size_t mdlen, mdcolor_t *out)
 {
 	int i;
-	assert(mdlen >= sizeof(u_int16_t) * COLOR_BLOCKS);
+	assert(mdlen == sizeof(u_int16_t) * COLOR_BLOCKS);
 	for (i = 0; i < COLOR_BLOCKS; i++) {
-		u16torgb(((u_int16_t*)md)[i], &out[i]);
+		u16torgb(md[i], &out->c[i]);
 	}
 }
 
 int
 read_digest(const char *str, u_int16_t *out)
 {
-	int i;
-
 	if (strlen(str) != COLOR_BLOCKS * 4) {
 		return -1;
 	}
-	for (i = 0; i < COLOR_BLOCKS; i++) {
-		if (sscanf(str, "%04hx", &out[i]) != 1) {
+	do {
+		if (sscanf(str, "%04hx", out) != 1) {
 			return -1;
 		}
 		str += 4;
-	}
+		out++;
+	} while (*str != '\0');
 	return 0;
 }
 
@@ -66,16 +69,16 @@ int
 main(int argc, char **argv)
 {
 	int i;
-	rgb_t c[COLOR_BLOCKS];
+	mdcolor_t cs;
 	u_int16_t buf[COLOR_BLOCKS];
 
 	if (argc != 2 || read_digest(argv[1], buf) < 0) {
 		usage(argv[0]);
 		return 1;
 	}
-	mdcolor(buf, sizeof buf, c);
+	mdcolor(buf, sizeof buf, &cs);
 	for (i = 0; i < COLOR_BLOCKS; ++i) {
-		printrgbhex(c[i]);
+		printrgbhex(cs.c[i]);
 	}
 	return 0;
 }
